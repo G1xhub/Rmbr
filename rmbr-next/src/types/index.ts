@@ -10,8 +10,17 @@ export interface Page {
   content: Block[];
   parentId: string | null;
   children: string[]; // child page IDs
+  isFavorite?: boolean;
+  comments?: Record<string, Comment>;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface Comment {
+  id: string;
+  text: string;
+  createdAt: Date;
+  selectedText?: string; // The text that was highlighted
 }
 
 export interface Board {
@@ -46,7 +55,7 @@ export interface CardProperty {
   value: unknown;
 }
 
-export type PropertyType = 
+export type PropertyType =
   | "text"
   | "number"
   | "select"
@@ -57,7 +66,7 @@ export type PropertyType =
   | "email"
   | "person";
 
-export type ColumnColor = 
+export type ColumnColor =
   | "gray"
   | "brown"
   | "orange"

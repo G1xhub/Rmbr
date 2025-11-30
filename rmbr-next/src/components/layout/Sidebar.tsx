@@ -2,6 +2,7 @@
 
 import { useWorkspaceStore } from "@/stores/workspace";
 import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
 import {
   ChevronDown,
   ChevronRight,
@@ -10,8 +11,10 @@ import {
   Search,
   Settings,
   Trash2,
+  Sun,
+  Moon,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function Sidebar() {
   const {
@@ -22,6 +25,14 @@ export function Sidebar() {
     deletePage,
     setActivePage,
   } = useWorkspaceStore();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+
+  // Avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Get root pages (no parent)
   const rootPages = Object.values(pages).filter((p) => !p.parentId);
@@ -29,27 +40,27 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "h-screen bg-[#fbfbfa] border-r border-gray-200 flex flex-col transition-all duration-200",
+        "h-screen bg-sidebar border-r border-sidebar-border flex flex-col transition-all duration-200",
         sidebarOpen ? "w-60" : "w-0 overflow-hidden"
       )}
     >
       {/* Workspace Header */}
-      <div className="p-3 border-b border-gray-100">
-        <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-100 rounded-md cursor-pointer">
-          <div className="w-5 h-5 bg-gradient-to-br from-purple-500 to-pink-500 rounded flex items-center justify-center text-white text-xs font-bold">
+      <div className="p-3 border-b border-sidebar-border">
+        <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-muted/50 rounded-md cursor-pointer transition-colors">
+          <div className="w-5 h-5 bg-gradient-to-br from-indigo-500 to-violet-500 rounded flex items-center justify-center text-white text-xs font-bold shadow-sm">
             R
           </div>
-          <span className="font-medium text-sm text-gray-700">rmbr</span>
-          <ChevronDown className="w-4 h-4 text-gray-400 ml-auto" />
+          <span className="font-medium text-sm text-foreground">rmbr</span>
+          <ChevronDown className="w-4 h-4 text-muted-foreground ml-auto" />
         </div>
       </div>
 
       {/* Search */}
       <div className="p-2">
-        <button className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-100 rounded-md transition-colors">
+        <button className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground rounded-md transition-colors">
           <Search className="w-4 h-4" />
           <span>Search</span>
-          <kbd className="ml-auto text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
+          <kbd className="ml-auto text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded border border-border">
             ⌘K
           </kbd>
         </button>
@@ -57,22 +68,22 @@ export function Sidebar() {
 
       {/* Pages List */}
       <div className="flex-1 overflow-y-auto p-2">
-        <div className="flex items-center justify-between px-2 py-1 mb-1">
-          <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">
+        <div className="flex items-center justify-between px-2 py-1 mb-1 group">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
             Pages
           </span>
           <button
             onClick={() => createPage()}
-            className="p-1 hover:bg-gray-100 rounded transition-colors"
+            className="p-1 hover:bg-muted rounded transition-colors opacity-0 group-hover:opacity-100"
           >
-            <Plus className="w-3.5 h-3.5 text-gray-400" />
+            <Plus className="w-3.5 h-3.5 text-muted-foreground" />
           </button>
         </div>
 
         {rootPages.length === 0 ? (
           <button
             onClick={() => createPage()}
-            className="w-full flex items-center gap-2 px-3 py-8 text-sm text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-md transition-colors border-2 border-dashed border-gray-200"
+            className="w-full flex items-center gap-2 px-3 py-8 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-md transition-colors border-2 border-dashed border-border hover:border-muted-foreground/50"
           >
             <Plus className="w-4 h-4" />
             <span>Create your first page</span>
@@ -95,12 +106,72 @@ export function Sidebar() {
       </div>
 
       {/* Footer */}
-      <div className="p-2 border-t border-gray-100">
-        <button className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-100 rounded-md transition-colors">
+      <div className="p-2 border-t border-sidebar-border space-y-1">
+        <button
+          onClick={() => setShowSettings(true)}
+          className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground rounded-md transition-colors"
+        >
           <Settings className="w-4 h-4" />
           <span>Settings</span>
         </button>
+
+        {mounted && (
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground rounded-md transition-colors"
+          >
+            {theme === "dark" ? (
+              <>
+                <Sun className="w-4 h-4" />
+                <span>Light Mode</span>
+              </>
+            ) : (
+              <>
+                <Moon className="w-4 h-4" />
+                <span>Dark Mode</span>
+              </>
+            )}
+          </button>
+        )}
       </div>
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-background border border-border rounded-lg shadow-lg w-full max-w-md p-6 m-4">
+            <h2 className="text-lg font-semibold mb-4 text-foreground">Settings</h2>
+
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-muted/50 border border-border">
+                <h3 className="text-sm font-medium text-foreground mb-2">Data Management</h3>
+                <p className="text-xs text-muted-foreground mb-4">
+                  Clear all local data including pages, boards, and settings. This action cannot be undone.
+                </p>
+                <button
+                  onClick={() => {
+                    if (confirm("Are you sure? This will delete everything.")) {
+                      localStorage.clear();
+                      window.location.reload();
+                    }
+                  }}
+                  className="px-4 py-2 bg-destructive text-destructive-foreground text-sm rounded-md hover:opacity-90 transition-opacity"
+                >
+                  Clear All Data
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowSettings(false)}
+                className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </aside>
   );
 }
@@ -132,7 +203,7 @@ function PageItem({
       <div
         className={cn(
           "group flex items-center gap-1 px-2 py-1 rounded-md cursor-pointer transition-colors",
-          isActive ? "bg-gray-200" : "hover:bg-gray-100"
+          isActive ? "bg-muted text-foreground" : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"
         )}
         style={{ paddingLeft: `${depth * 12 + 8}px` }}
         onClick={onSelect}
@@ -144,14 +215,14 @@ function PageItem({
             setIsExpanded(!isExpanded);
           }}
           className={cn(
-            "p-0.5 rounded hover:bg-gray-200 transition-colors",
+            "p-0.5 rounded hover:bg-muted transition-colors",
             !hasChildren && "invisible"
           )}
         >
           {isExpanded ? (
-            <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+            <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
           ) : (
-            <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
+            <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
           )}
         </button>
 
@@ -159,7 +230,7 @@ function PageItem({
         <span className="text-base">{page.icon || "📄"}</span>
 
         {/* Title */}
-        <span className="flex-1 text-sm text-gray-700 truncate">
+        <span className="flex-1 text-sm truncate">
           {page.title || "Untitled"}
         </span>
 
@@ -170,18 +241,18 @@ function PageItem({
               e.stopPropagation();
               onAddChild();
             }}
-            className="p-1 hover:bg-gray-200 rounded transition-colors"
+            className="p-1 hover:bg-muted rounded transition-colors"
           >
-            <Plus className="w-3.5 h-3.5 text-gray-400" />
+            <Plus className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground" />
           </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
               onDelete();
             }}
-            className="p-1 hover:bg-red-100 rounded transition-colors"
+            className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
           >
-            <Trash2 className="w-3.5 h-3.5 text-gray-400 hover:text-red-500" />
+            <Trash2 className="w-3.5 h-3.5 text-muted-foreground hover:text-red-500" />
           </button>
         </div>
       </div>
@@ -195,9 +266,9 @@ function PageItem({
               page={child}
               depth={depth + 1}
               isActive={false}
-              onSelect={() => {}}
-              onDelete={() => {}}
-              onAddChild={() => {}}
+              onSelect={() => { }}
+              onDelete={() => { }}
+              onAddChild={() => { }}
             />
           ))}
         </div>

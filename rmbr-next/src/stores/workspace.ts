@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Page, Board, Card, Column } from "@/types";
+import type { Page, Board, Card, Column, Comment } from "@/types";
 import type { Block } from "@blocknote/core";
 
 interface WorkspaceState {
@@ -8,27 +8,30 @@ interface WorkspaceState {
   pages: Record<string, Page>;
   boards: Record<string, Board>;
   cards: Record<string, Card>;
-  
+
   // UI State
   activePage: string | null;
   sidebarOpen: boolean;
-  
+
   // Page Actions
   createPage: (parentId?: string | null) => string;
   updatePage: (id: string, updates: Partial<Page>) => void;
   deletePage: (id: string) => void;
   updatePageContent: (id: string, content: Block[]) => void;
-  
+  toggleFavorite: (id: string) => void;
+  addComment: (pageId: string, text: string, selectedText?: string, id?: string) => string;
+  deleteComment: (pageId: string, commentId: string) => void;
+
   // Board Actions
   createBoard: (pageId: string) => string;
   addColumn: (boardId: string, title: string) => void;
   moveCard: (cardId: string, fromColumnId: string, toColumnId: string, newIndex: number) => void;
-  
+
   // Card Actions
   createCard: (boardId: string, columnId: string, title: string) => string;
   updateCard: (id: string, updates: Partial<Card>) => void;
   deleteCard: (id: string) => void;
-  
+
   // UI Actions
   setActivePage: (id: string | null) => void;
   toggleSidebar: () => void;
@@ -55,13 +58,15 @@ export const useWorkspaceStore = create<WorkspaceState>()(
           content: [],
           parentId,
           children: [],
+          isFavorite: false,
+          comments: {},
           createdAt: new Date(),
           updatedAt: new Date(),
         };
 
         set((state) => {
           const pages = { ...state.pages, [id]: newPage };
-          
+
           // Add to parent's children if has parent
           if (parentId && state.pages[parentId]) {
             pages[parentId] = {
@@ -69,7 +74,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
               children: [...state.pages[parentId].children, id],
             };
           }
-          
+
           return { pages, activePage: id };
         });
 
@@ -102,13 +107,69 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         }));
       },
 
+      toggleFavorite: (id) => {
+        set((state) => ({
+          pages: {
+            ...state.pages,
+            [id]: {
+              ...state.pages[id],
+              isFavorite: !state.pages[id].isFavorite,
+            },
+          },
+        }));
+      },
+
+      addComment: (pageId, text, selectedText, id) => {
+        const commentId = id || generateId();
+        const newComment: Comment = {
+          id: commentId,
+          text,
+          selectedText,
+          createdAt: new Date(),
+        };
+
+        set((state) => ({
+          pages: {
+            ...state.pages,
+            [pageId]: {
+              ...state.pages[pageId],
+              comments: {
+                ...(state.pages[pageId].comments || {}),
+                [commentId]: newComment,
+              },
+            },
+          },
+        }));
+        return commentId;
+      },
+
+      deleteComment: (pageId, commentId) => {
+        set((state) => {
+          const page = state.pages[pageId];
+          if (!page || !page.comments) return state;
+
+          const newComments = { ...page.comments };
+          delete newComments[commentId];
+
+          return {
+            pages: {
+              ...state.pages,
+              [pageId]: {
+                ...page,
+                comments: newComments,
+              },
+            },
+          };
+        });
+      },
+
       deletePage: (id) => {
         set((state) => {
           const page = state.pages[id];
           if (!page) return state;
 
           const newPages = { ...state.pages };
-          
+
           // Remove from parent's children
           if (page.parentId && newPages[page.parentId]) {
             newPages[page.parentId] = {

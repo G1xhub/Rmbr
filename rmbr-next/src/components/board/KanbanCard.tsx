@@ -31,8 +31,8 @@ export function KanbanCard({ card, isDragging }: KanbanCardProps) {
       ref={setNodeRef}
       style={style}
       className={cn(
-        "group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all cursor-pointer",
-        (isDragging || isSortableDragging) && "opacity-50 shadow-lg rotate-2",
+        "group bg-background rounded-lg border border-border shadow-sm hover:shadow-md hover:border-muted-foreground/30 transition-all cursor-pointer",
+        (isDragging || isSortableDragging) && "opacity-50 shadow-lg rotate-2 ring-2 ring-primary/20",
         isDragging && "shadow-xl"
       )}
     >
@@ -43,22 +43,22 @@ export function KanbanCard({ card, isDragging }: KanbanCardProps) {
           {...listeners}
           className="opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing mt-0.5"
         >
-          <GripVertical className="w-4 h-4 text-gray-400" />
+          <GripVertical className="w-4 h-4 text-muted-foreground" />
         </button>
 
         {/* Card Content */}
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-gray-800 font-medium leading-snug">
+          <p className="text-sm text-foreground font-medium leading-snug">
             {card.title}
           </p>
-          
+
           {/* Properties Preview (if any) */}
           {card.properties.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-2">
               {card.properties.slice(0, 3).map((prop) => (
                 <span
                   key={prop.id}
-                  className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded"
+                  className="px-2 py-0.5 text-xs bg-muted text-muted-foreground rounded"
                 >
                   {String(prop.value)}
                 </span>

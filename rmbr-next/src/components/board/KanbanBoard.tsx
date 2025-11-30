@@ -129,7 +129,7 @@ export function KanbanBoard({ board }: KanbanBoardProps) {
           {/* Add Column Button */}
           <button
             onClick={handleAddColumn}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors min-w-[200px] justify-center border-2 border-dashed border-gray-200 hover:border-gray-300"
+            className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors min-w-[200px] justify-center border-2 border-dashed border-border hover:border-muted-foreground/50"
           >
             <Plus className="w-4 h-4" />
             Add Column

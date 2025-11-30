@@ -49,7 +49,7 @@ export function KanbanColumn({ column, cards, onAddCard }: KanbanColumnProps) {
     <div
       className={cn(
         "flex flex-col w-[280px] min-w-[280px] rounded-xl transition-colors",
-        isOver && "ring-2 ring-blue-400 ring-opacity-50"
+        isOver && "bg-muted/50"
       )}
     >
       {/* Column Header */}
@@ -61,18 +61,18 @@ export function KanbanColumn({ column, cards, onAddCard }: KanbanColumnProps) {
               columnDotColors[column.color] || columnDotColors.gray
             )}
           />
-          <h3 className="font-medium text-sm text-gray-700">{column.title}</h3>
-          <span className="text-xs text-gray-400 ml-1">{cards.length}</span>
+          <h3 className="font-medium text-sm text-foreground">{column.title}</h3>
+          <span className="text-xs text-muted-foreground ml-1">{cards.length}</span>
         </div>
         <div className="flex items-center gap-1">
           <button
             onClick={onAddCard}
-            className="p-1 hover:bg-gray-100 rounded transition-colors"
+            className="p-1 hover:bg-muted rounded transition-colors"
           >
-            <Plus className="w-4 h-4 text-gray-400" />
+            <Plus className="w-4 h-4 text-muted-foreground" />
           </button>
-          <button className="p-1 hover:bg-gray-100 rounded transition-colors">
-            <MoreHorizontal className="w-4 h-4 text-gray-400" />
+          <button className="p-1 hover:bg-muted rounded transition-colors">
+            <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
       </div>
@@ -82,7 +82,7 @@ export function KanbanColumn({ column, cards, onAddCard }: KanbanColumnProps) {
         ref={setNodeRef}
         className={cn(
           "flex-1 flex flex-col gap-2 p-1 min-h-[100px] rounded-lg transition-colors",
-          isOver && columnColors[column.color]
+          isOver && "bg-muted/30"
         )}
       >
         <SortableContext
@@ -98,7 +98,7 @@ export function KanbanColumn({ column, cards, onAddCard }: KanbanColumnProps) {
       {/* Add Card Button (at bottom) */}
       <button
         onClick={onAddCard}
-        className="flex items-center gap-2 px-3 py-2 mt-1 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+        className="flex items-center gap-2 px-3 py-2 mt-1 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors"
       >
         <Plus className="w-4 h-4" />
         <span>New</span>
